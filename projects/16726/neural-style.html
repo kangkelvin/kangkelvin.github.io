@@ -1,0 +1,205 @@
+<!DOCTYPE HTML>
+<!--
+	Story by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Neural Style</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+	</head>
+	<body class="is-preload">
+
+		<!-- Wrapper -->
+		<div id="wrapper" class="divided">
+
+			<!-- Landing Page -->
+			<section class="banner style1 orient-left content-align-left image-position-center fullscreen onload-image-fade-in onload-content-fade-right">
+				<div class="content">
+					<h1>Neural Style Transfer</h1>
+					<h3>Author: Kelvin Kang</h3>
+					<p class="major">
+						Neural Style Transer model takes in a content image, e.g. a real photo of a building, and a style image, e.g. a famous painting, and transfer
+						the style from the painting to the content image.
+					</p>
+					<!-- <ul class="actions stacked">
+						<li><a href="#first" class="button big wide smooth-scroll-middle">Get Started</a></li>
+					</ul> -->
+				</div>
+				<div class="image fit">
+					<img src="images/content_0.jpeg" alt="" class="center"/>
+				</div>
+			</section>
+
+			<!-- Highlight 1 -->
+			<section class="spotlight style1 orient-right content-align-left image-position-center onscroll-image-fade-in" id="first">
+				<div class="content">
+					<h2>Approach</h2>
+					<p>
+						Neural Style Transfer utilizes a pre-trained network, such as VGG19, to extract features from both the content and style images.
+						The model then optimizes for both content and style loss. The content loss is using perceptual loss, i.e. L2 norm of the features space
+						of the first few activations of the images when passed through the pre-trained VGG19. The  style loss is an L2 norm of the gram matrix of the
+						features space.
+					</p>
+					<!-- <ul class="actions stacked">
+						<li><a href="#" class="button">Learn More</a></li>
+					</ul> -->
+				</div>
+				<div class="image">
+					<img src="images/content_2.jpeg" alt="" />
+				</div>
+			</section>
+
+			<!-- Additional Elements -->
+			<section class="wrapper style1 align-center">
+				
+				<div class="inner">
+					<h1>Content Reconstruction</h1>
+
+					<p>
+					Optimizing the content loss at earlier layers create a better reconstruction of the original image. Optimizing the later layers
+					create a reconstruction that only captures higher-level objects, such as the main outline of the image and losing the finer details
+					such as colors. The image below shows the different result of the reconstruction at early, middle, and later layers.
+					</p>
+					<span class="image fit"><img src="images/recon_plot.png" alt="" /></span>
+					<p>	</p>
+
+					<p>
+					My favorite layer to use for content loss is conv_5, because I find that it is better to only have the higher-level features from the content
+					when using Neural Style Transfer. This is because I want the finer details such as colors to becoming from the style image instead. The reconstruction
+					done below shows that it holds most of the major outlines of the phipps building, but it has a greenish tint and the colors of the flowers has a lower
+					saturation. White noise artifacts appeared in the reconstructed image. But the two images reconstructed from different initial noise images look almost
+					identical. This is probably because the perceptual loss have the same final optimized values regardless of the initial image. Perceptual loss has a spatial
+					component to it.
+					</p>
+					<span class="image fit"><img src="images/phipps.jpeg" alt="" /></span>
+					<span class="image fit"><img src="images/recon5.jpeg" alt="" /></span>
+					<span class="image fit"><img src="images/reconconv_5.jpeg" alt="" /></span>
+					<p>	</p>
+
+					<h1>Texture Synthesis</h1>
+
+					<p>
+					Optimizing the style loss at later layers creates larger styles, you can see textures such as brush strokes. But the earlier layers do not have
+					the strokes as it has not seen a large enough part of the style image from its receptive field. But since the later layers have more higher-level 
+					features, it is lacking good colors. So I pick ['conv_2', 'conv_3', 'conv_4'] as I find it is a good balance of the shape texture and the vibrant colors
+					from the style image.
+					</p>
+					<span class="image fit"><img src="images/texture_plot.png" alt="" /></span>
+					<p>	</p>
+
+					<p>
+					Below are the two textures generated from two random noise images. Unlike the image reconstruction, you can see that the two images are different on the
+					pixel level. They are very similar in the textures that were generated, but they are still obviously different. This is probably because the style loss
+					uses the gram matrix, which is an aggregate metrics over the entire image. Hence, there is nothing in the loss function that enforces spatial consistency
+					across different inputs unlike perceptual loss in content reconstruction.
+					</p>
+					<span class="image fit"><img src="images/texturemid.jpeg" alt="" /></span>
+					<span class="image fit"><img src="images/texturemid2.jpeg" alt="" /></span>
+					<p>	</p>
+
+					<h1>Style Transfer</h1>
+
+					<p>
+					The style transfer pipelines starts with a pre-trained VGG19 net. I chopped off the layers after 'conv_5' as they are unnecesary for this task.
+					Then I insert PyTorch modules for the Content and Style loss. The initial, content, and style images are then passed to the network to extract their features and gram matrix 
+					for loss calcuation. LBFGS optimizer is used to iteratively optimize the initial image. I did not use a for loop to set the number of iterations, I instead change the
+					max_iter of the LBFGS and lowering its convergence threshold to force it to keep iterating until max_iter is reached.
+					</p>
+					<p>	</p>
+
+					<p>
+					Below are the reconstructed images using noise initialization
+					</p>
+					<span class="image fit"><img src="images/noise_plot.png" alt="" /></span>
+					<p>	</p>
+
+					<p>
+					Below are the reconstructed images using content image as initialization
+					</p>
+					<span class="image fit"><img src="images/content_plot.png" alt="" /></span>
+					<p>	</p>
+
+					<p>
+					Using content image as initialization produces better recon images in my opinion, I can still clearly see the content high-level features, but it is infused with the style from
+					the style image. The noise initialization images cannot seem to produce this level of quality. Initially, I thought that I just need to lower the style weight, but it still
+					fails to produce good images. The content initialization reconstruction takes a longer time, almost double, than that of noise initialization reconstruction.
+					</p>
+					<p>	</p>
+
+					<p>
+					Below are reconstructed image of style transfer from a Van Gogh painting to a Pittsburgh skyline
+					</p>
+					<span class="image fit"><img src="images/pittsburgh_plot.png" alt="" /></span>
+					<p>	</p>
+	
+				</div>
+			</section>
+		
+			<section class="wrapper style1 align-center">
+		
+				<div class="inner">
+					<h2 id="Bells & Whistles">Bells & Whistles</h2>
+
+					<p>
+					I applied the style transfer on my blended image from HW2 Poisson Blending. The result is not very good, but it highlights the limitation
+					of the Neural Style Transfer. The style image painting does not have bold strokes or colors, creating mostly shades of beige. The content
+					image also has words and lines, that produces strange artifacts when style is transfered on them.
+					</p>
+					<span class="image fit"><img src="images/baby_plot.png" alt="" /></span>
+					<p>	</p>
+					
+
+					<div class="index align-left">
+
+						<!-- Text -->
+						<!-- <section>
+							<header>
+								<h3>Mixed Gradients</h3>
+							</header>
+							<div class="content">
+
+								<p>
+								Instead of always transplanting the gradients from the source image, for each pixel, I transplant either the gradients from the source or
+								the brackground image based on the highest magnitude of gradients. This mixes the gradients of the source and background images.
+								</p>
+
+								<span class="image align-center"><img src="images/mixed2.jpg" alt="" /></span>
+
+								<p>
+								However, this produces a worse result in my opinion as it makes the source object slightly transparent and 'ghostly'
+								</p>
+
+							</div>
+						</section> -->
+
+					</div>
+				</div>
+			</section>
+
+			<!-- Footer -->
+			<footer class="wrapper style1 align-center">
+				<div class="inner">
+					<ul class="icons">
+						<li><a href="https://www.linkedin.com/in/kangkelvin/" class="icon brands style2 fa-linkedin-in"><span class="label">LinkedIn</span></a></li>
+						<li><a href="mailto:kelvin_kang@outlook.com" class="icon style2 fa-envelope"><span class="label">Email</span></a></li>
+					</ul>
+					<p>&copy; Kelvin Kang. Design: <a href="https://html5up.net">HTML5 UP</a>.</p>
+				</div>
+			</footer>
+
+		<!-- Scripts -->
+		<script src="assets/js/jquery.min.js"></script>
+		<script src="assets/js/jquery.scrollex.min.js"></script>
+		<script src="assets/js/jquery.scrolly.min.js"></script>
+		<script src="assets/js/browser.min.js"></script>
+		<script src="assets/js/breakpoints.min.js"></script>
+		<script src="assets/js/util.js"></script>
+		<script src="assets/js/main.js"></script>
+
+	</body>
+</html>

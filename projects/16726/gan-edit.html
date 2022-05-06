@@ -1,0 +1,293 @@
+<!DOCTYPE HTML>
+<!--
+	Story by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>GAN Editing</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+	</head>
+	<body class="is-preload">
+
+		<!-- Wrapper -->
+		<div id="wrapper" class="divided">
+
+			<!-- Landing Page -->
+			<section class="banner style1 orient-left content-align-left image-position-center fullscreen onload-image-fade-in onload-content-fade-right">
+				<div class="content">
+					<h1>GAN Photo Editing</h1>
+					<h3>Author: Kelvin Kang</h3>
+					<p class="major">
+						Here we try to edit a photo not in pixel space but in a Generative Adversarial Network (GAN) latent space.
+					</p>
+					<!-- <ul class="actions stacked">
+						<li><a href="#first" class="button big wide smooth-scroll-middle">Get Started</a></li>
+					</ul> -->
+				</div>
+				<div class="image fit">
+					<img src="images/interpolate/1_stylegan_w+_highres.gif" alt="" class="center"/>
+				</div>
+			</section>
+
+			<!-- Highlight 1 -->
+			<section class="spotlight style1 orient-right content-align-left image-position-center onscroll-image-fade-in" id="first">
+				<div class="content">
+					<h2>Approach</h2>
+					<p>
+						We use a pre-trained GAN such as StyleGAN as our generator. The reference image is first inverted back to the GAN's latent space, then
+						it is moved along the latent space and generated again. This way we will edit images that lie along the generated image manifold.
+					</p>
+					<!-- <ul class="actions stacked">
+						<li><a href="#" class="button">Learn More</a></li>
+					</ul> -->
+				</div>
+				<div class="image">
+					<img src="images/stylegan_sample_w+.png" alt="" />
+				</div>
+			</section>
+
+			<!-- Additional Elements -->
+			<section class="wrapper style1 align-center">
+				
+				<div class="inner">
+					<h1>Part 1: Inverting The Generator</h1>
+
+					<p>
+					Using an optimizer such as LBFGS, we find the latent code z that best reconstruct an image when passed through a generator. Below is the input
+					reference image that we try to find the best latent code z.
+					</p>
+					<span class="image align-center"><img src="images/project/latents_all_loss/0_data.png" alt="" /></span>
+					<p>	</p>
+
+					<!-- Table -->
+					<section>
+						<header>
+							<h3>Reconstruction Result</h3>
+						</header>
+						<div class="content">
+
+							<div class="table-wrapper">
+								<table>
+									<thead>
+										<tr>
+											<th scope="col" style="text-align:center">Loss Used</th>
+											<th scope="col" style="text-align:center">StyleGAN z</th>
+											<th scope="col" style="text-align:center">StyleGAN w</th>
+											<th scope="col" style="text-align:center">StyleGAN w+</th>
+											<th scope="col" style="text-align:center">VanillaGAN z</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<td scope="row">L1 Loss</td>
+											<td><img src="images/project/latents_l1_only/0_stylegan_z_0_1000.png" alt="" /></td>
+											<td><img src="images/project/latents_l1_only/0_stylegan_w_0_1000.png" alt="" /></td>
+											<td><img src="images/project/latents_l1_only/0_stylegan_w+_0_1000.png" alt="" /></td>
+											<td><img src="images/project/latents_l1_only/0_vanilla_z_0_1000.png" alt="" /></td>
+										</tr>
+										<tr>
+											<td scope="row">Perceptual Loss</td>
+											<td><img src="images/project/latents_perc_only/0_stylegan_z_0.01_1000.png" alt="" /></td>
+											<td><img src="images/project/latents_perc_only/0_stylegan_w_0.01_1000.png" alt="" /></td>
+											<td><img src="images/project/latents_perc_only/0_stylegan_w+_0.01_1000.png" alt="" /></td>
+											<td><img src="images/project/latents_perc_only/0_vanilla_z_0.01_1000.png" alt="" /></td>
+										</tr>
+										<tr>
+											<td scope="row">L1 + Perceptual</td>
+											<td><img src="images/project/latents_all_loss/0_stylegan_z_0.01_1000.png" alt="" /></td>
+											<td><img src="images/project/latents_all_loss/0_stylegan_w_0.01_1000.png" alt="" /></td>
+											<td><img src="images/project/latents_all_loss/0_stylegan_w+_0.01_1000.png" alt="" /></td>
+											<td><img src="images/project/latents_all_loss/0_vanilla_z_0.01_1000.png" alt="" /></td>
+										</tr>
+										
+									</tbody>
+									<!-- <tfoot>
+										<tr>
+											<td colspan="2"></td>
+											<td>100.00</td>
+										</tr>
+									</tfoot> -->
+								</table>
+							</div>
+
+						</div>
+					</section>
+
+					<p>
+					Between the different loss functions, using L1 loss only produces slightly blurry images. This is expected as Lp losses have an averaging effect
+					that causes a blurry images. Using perceptual loss only creates good cat images, but it is lacking in color accuracy. This is expected as we are using
+					a slightly deep feature activation map (conv_5), which from hw4 we know does not contain detailed color information. Therefore, I find that we best
+					loss is combining the perceptual and the L1 loss.
+					</p>
+					<p>	</p>
+
+					<p>
+					There are obvious quality differences between the vanillaGAN and StyleGAN. This is expected as vanillaGAN is a simple and relatively shallow network.
+					HW4 has shown that this model is limited in its ability to produce realistic images. Images from VanillaGAN is more blurry, with less details such as 
+					the eye color and furs.
+					</p>
+					<p>	</p>
+
+					<p>
+					There are only minor differences between StyleGAN z, w, and w+ space. All three latent codes can reconstruct good images. However, I find that w and w+ latents
+					produce slightly better images, this can be seen when you compare the cat's eyes. z latent does not produce as sharp of eyes than w and w+.
+					</p>
+					<p>	</p>
+
+					<p>
+					I find that using L1 + Perceptual loss with StyleGAN w+ latent space produces the best results. As seen below, the cat pose looks almost identical
+					to the reference image, and details such as the greenish background is preserved. The Reconstruction took 30.1 seconds to complete 1000 interations.
+					</p>
+					<span class="image align-left"><img src="images/project/latents_all_loss/0_data.png" alt="" /></span>
+					<span class="image align-right"><img src="images/project/latents_all_loss/0_stylegan_w+_0.01_1000.png" alt="" /></span>
+					<p>	</p>
+
+					<h1>Part 2: Interpolate the Latent Space</h1>
+
+					<p>
+					After finding the latent code of input images, we can take two input images, find their latent codes and iterpolate between the two codes.
+					I used StyleGAN w+ latent code with L1 + Perceptual Loss to perform the interpolations. The results look good, with the intermediate images
+					still looking realistic. This is the advantage of GAN Photo Editing, the generator prevents 'strange-looking' outputs as we do not directly
+					edit on the pixel space.
+					Below are the results of some of them.
+					</p>
+					<span class="image align-center"><img src="images/interpolate/1_stylegan_w+.gif" alt="" /></span>
+					<span class="image align-center"><img src="images/interpolate/3_stylegan_w+.gif" alt="" /></span>
+					<span class="image align-center"><img src="images/interpolate/4_stylegan_w+.gif" alt="" /></span>
+					<span class="image align-center"><img src="images/interpolate/5_stylegan_w+.gif" alt="" /></span>
+					<span class="image align-center"><img src="images/interpolate/6_stylegan_w+.gif" alt="" /></span>
+					<span class="image align-center"><img src="images/interpolate/7_stylegan_w+.gif" alt="" /></span>
+					<span class="image align-center"><img src="images/interpolate/8_stylegan_w+.gif" alt="" /></span>
+					<span class="image align-center"><img src="images/interpolate/10_stylegan_w+.gif" alt="" /></span>
+					<p>	</p>
+
+					<h1>Part 3: Scribble To Image</h1>
+
+					<p>
+					In this section we use a user-defined scribble of a cat and uses it as a constraint when reconstructing a cat image. Concretely, we use the
+					user sketch outline and color as an L1 loss for the output image. The sketch outline is also used as a mask for the perceptual loss.
+					One key finding is that z latent space is a poor choice for this task. Below are the results of some of the generated output.
+					</p>
+					<span class="image align-center"><img src="images/draw/0_data.png" alt="" /></span>
+					<span class="image align-center"><img src="images/draw/0_stylegan_z_0.01_1000.png" alt="" /></span>
+					<span class="image align-center"><img src="images/blank.png" alt="" /></span>
+					<span class="image align-center"><img src="images/draw/1_data.png" alt="" /></span>
+					<span class="image align-center"><img src="images/draw/1_stylegan_z_0.01_1000.png" alt="" /></span>
+					<p>	</p>
+
+					<p>
+					This is in contrast to the images generated by w or w+ latent space. This is most likely because the learnt intermediate latent space w
+					that is obtained by passing z through a series of FC layers 'unwraps' the z latent space, no longer restricting it to a gaussian distribution that has
+					to contain good representations in all direction and values. The result is that w and w+ space has a more disentangled representations which allow
+					the network to produce realistic images as it can more easily adjust certain properties of the image. Below are images generated with w space (left)
+					and w+ space (right)
+					</p>
+					<span class="image align-center"><img src="images/draw/0_data.png" alt="" /></span>
+					<span class="image align-center"><img src="images/draw/0_stylegan_w_0.01_1000.png" alt="" /></span>
+					<span class="image align-center"><img src="images/blank.png" alt="" /></span>
+					<span class="image align-center"><img src="images/draw/1_data.png" alt="" /></span>
+					<span class="image align-center"><img src="images/draw/1_stylegan_w_0.01_1000.png" alt="" /></span>
+					<span class="image align-center"><img src="images/blank.png" alt="" /></span>
+					<span class="image align-center"><img src="images/blank.png" alt="" /></span>
+					<span class="image align-center"><img src="images/blank.png" alt="" /></span>
+					<span class="image align-center"><img src="images/draw/0_data.png" alt="" /></span>
+					<span class="image align-center"><img src="images/draw/0_stylegan_w+_0.01_1000.png" alt="" /></span>
+					<span class="image align-center"><img src="images/blank.png" alt="" /></span>
+					<span class="image align-center"><img src="images/draw/1_data.png" alt="" /></span>
+					<span class="image align-center"><img src="images/draw/1_stylegan_w+_0.01_1000.png" alt="" /></span>
+					<p>	</p>
+
+					<p>
+					From the examples above, the w+ space slightly overperforms the w space, hence we will use w+ space for the rest of the examples. However,
+					even the w+ space sometimes struggle to create good images when the user input drawings do not conform well to a real cat image. For example,
+					the drawings below has a 'cartoon-ish' shapes, and this create a constraint on the network, making it difficult to generate realistic images.
+					</p>
+					<span class="image align-center"><img src="images/draw/5_data.png" alt="" /></span>
+					<span class="image align-center"><img src="images/draw/5_stylegan_w+_0.01_1000.png" alt="" /></span>
+					<span class="image align-center"><img src="images/blank.png" alt="" /></span>
+					<span class="image align-center"><img src="images/draw/6_data.png" alt="" /></span>
+					<span class="image align-center"><img src="images/draw/6_stylegan_w+_0.01_1000.png" alt="" /></span>
+					<p>	</p>
+
+					<p>
+					In fact, generally the network can produce better images when the user input drawings are sparse. This is because we do not over constraint the network,
+					allowing it more freedom to create a realistic image. Below are some examples of dense drawings that failed to produce good images.
+					</p>
+					<span class="image align-center"><img src="images/draw/2_data.png" alt="" /></span>
+					<span class="image align-center"><img src="images/draw/2_stylegan_w+_0.01_1000.png" alt="" /></span>
+					<span class="image align-center"><img src="images/blank.png" alt="" /></span>
+					<span class="image align-center"><img src="images/draw/3_data.png" alt="" /></span>
+					<span class="image align-center"><img src="images/draw/3_stylegan_w+_0.01_1000.png" alt="" /></span>
+					<span class="image align-center"><img src="images/blank.png" alt="" /></span>
+					<span class="image align-center"><img src="images/draw/4_data.png" alt="" /></span>
+					<span class="image align-center"><img src="images/draw/4_stylegan_w+_0.01_1000.png" alt="" /></span>
+
+				</div>
+			</section>
+
+			<section class="wrapper style1 align-center">
+		
+				<div class="inner">
+					<h2 id="Bells & Whistles">Bells & Whistles</h2>
+
+					<p>
+					I used the higher resolution dataset to produce the output images.
+					</p>
+					<span class="image align-center"><img src="images/interpolate/1_stylegan_w+_highres.gif" alt="" /></span>
+					<p>	</p>
+					
+
+					<div class="index align-left">
+
+						<!-- Text -->
+						<!-- <section>
+							<header>
+								<h3>Mixed Gradients</h3>
+							</header>
+							<div class="content">
+
+								<p>
+								Instead of always transplanting the gradients from the source image, for each pixel, I transplant either the gradients from the source or
+								the brackground image based on the highest magnitude of gradients. This mixes the gradients of the source and background images.
+								</p>
+
+								<span class="image align-center"><img src="images/mixed2.jpg" alt="" /></span>
+
+								<p>
+								However, this produces a worse result in my opinion as it makes the source object slightly transparent and 'ghostly'
+								</p>
+
+							</div>
+						</section> -->
+
+					</div>
+				</div>
+			</section>
+
+			<!-- Footer -->
+			<footer class="wrapper style1 align-center">
+				<div class="inner">
+					<ul class="icons">
+						<li><a href="https://www.linkedin.com/in/kangkelvin/" class="icon brands style2 fa-linkedin-in"><span class="label">LinkedIn</span></a></li>
+						<li><a href="mailto:kelvin_kang@outlook.com" class="icon style2 fa-envelope"><span class="label">Email</span></a></li>
+					</ul>
+					<p>&copy; Kelvin Kang. Design: <a href="https://html5up.net">HTML5 UP</a>.</p>
+				</div>
+			</footer>
+
+		<!-- Scripts -->
+		<script src="assets/js/jquery.min.js"></script>
+		<script src="assets/js/jquery.scrollex.min.js"></script>
+		<script src="assets/js/jquery.scrolly.min.js"></script>
+		<script src="assets/js/browser.min.js"></script>
+		<script src="assets/js/breakpoints.min.js"></script>
+		<script src="assets/js/util.js"></script>
+		<script src="assets/js/main.js"></script>
+
+	</body>
+</html>
