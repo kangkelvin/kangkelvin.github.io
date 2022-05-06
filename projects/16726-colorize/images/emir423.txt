@@ -1,0 +1,9 @@
+rgb borders: [[174, 3550, 1, 3110], [185, 3632, 6, 3144], [96, 3640, 101, 3161]]
+final trim values: (185, 3550, 101, 3110)
+pyramid scales: [1, 4, 8, 16, 32]
+offsets: (3, 6, 2, 3) search_range: 15
+offsets: (7, 13, 3, 6) search_range: 12
+offsets: (13, 26, 6, 12) search_range: 6
+offsets: (23, 52, 12, 24) search_range: 6
+offsets: (44, 104, 24, 49) search_range: 3
+--- 22.55072045326233 seconds ---

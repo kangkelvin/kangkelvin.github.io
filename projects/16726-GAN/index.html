@@ -1,0 +1,335 @@
+<!DOCTYPE HTML>
+<!--
+	Story by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>16726 Kelvin Kang HW3</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+	</head>
+	<body class="is-preload">
+
+		<!-- Wrapper -->
+		<div id="wrapper" class="divided">
+
+			<!-- Landing Page -->
+			<section class="banner style1 orient-left content-align-left image-position-center fullscreen onload-image-fade-in onload-content-fade-right">
+				<div class="content">
+					<h1>HW 3: Generative Adversarial Network</h1>
+					<h3>Author: Kelvin Kang</h3>
+					<p class="major">
+						This website will demonstrate a standard Deep Convolutional Generative Adversarial Network (DCGAN) that can generate a picture 
+						from randomly sampled noise; and a Cycle GAN that converts one image from a particular domain to another. For example, apple to orange.
+					</p>
+					<!-- <ul class="actions stacked">
+						<li><a href="#first" class="button big wide smooth-scroll-middle">Get Started</a></li>
+					</ul> -->
+				</div>
+				<div class="image fit">
+					<img src="images/deluxe_diffaug_late.png" alt="" class="center"/>
+				</div>
+			</section>
+
+			<!-- Highlight 1 -->
+			<section class="spotlight style1 orient-right content-align-left image-position-center onscroll-image-fade-in" id="first">
+				<div class="content">
+					<h2>Problem Statement</h2>
+					<p>
+						For DCGAN, given a training data set, for example many pictures of a cat. Train a generator that can sample different pictures of the
+						cat in the training data set. For Cycle GAN, given unlabelled set of images from two different domain, e.g. apple and oranges, train a
+						generator that can convert an image of one domain (apple) to another (orange) while preserving the content, e.g. where the fruit is located
+						in the image.
+					</p>
+					<!-- <ul class="actions stacked">
+						<li><a href="#" class="button">Learn More</a></li>
+					</ul> -->
+				</div>
+				<div class="image">
+					<img src="images/real.png" alt="" />
+				</div>
+			</section>
+
+			<!-- Additional Elements -->
+			<section class="wrapper style1 align-center">
+				
+				<div class="inner">
+					<h2 id="DCGAN">DCGAN</h2>
+
+					<h3>Methodology</h3>
+
+					<h4>Discriminator</h4>
+					<p>
+					GAN consist of a discriminator and a generator. The discriminator used is a few layes of CNN network that outputs a single number that predicts
+					if an image is real or fake. The architecture of the discriminator is shown below. I used a kernel size K = 4 and stride S = 2. Since I want
+					to half the image size at every layer for conv1 to conv4, I can use the equation input_size = (output_size - K + 2P) / S + 1, 
+					to calculate that P = 1 for this case. For the conv5, using the same equation I can calculate that P = 0.
+					</p>
+					<span class="image fit"><img src="images/discriminator_dcgan.png" alt="" /></span>
+					<p>	</p>
+
+					<h4>Generator</h4>
+					<p>
+					For the generator, we used upsampling and convolutional layer to generate an image from a vector of random noise. The architecture of the generator
+					is shown below. up_conv2 to up_conv5 uses a 2x upsampling then followed by convolutional with K = 5, S = 1, and P = 2. Hence the input to the layer
+					is doubled in size and the convolutions do not change the sizes. up_conv1 is implemented with only a convolutional layer with K = 4, S = 1, and P = 3.
+					This will change the input 1x1 into output 4x4.
+					</p>
+					<span class="image fit"><img src="images/generator_dcgan.png" alt="" /></span>
+					<p>	</p>
+
+					<h4>Training</h4>
+					<p>
+					Training is done with a simple GAN loss described below. To prevent overfit, the data augmentation is used. I used random crop, color jitter, 
+					random horizontal flip and differential augmentation.
+					</p>
+					<span class="image fit"><img src="images/gan_algo.png" alt="" /></span>
+					<p>	</p>
+
+					<h3>Results</h3>
+
+					<h4>Basic augmentation</h4>
+
+					<span class="image aln-left"><img src="images/basic_d.PNG" alt="" /></span>
+					<span class="image aln-right"><img src="images/basic_g.PNG" alt="" /></span>
+					<p>	</p>
+
+					<h4>Deluxe augmentation</h4>
+
+					<span class="image aln-left"><img src="images/deluxe_d.PNG" alt="" /></span>
+					<span class="image aln-right"><img src="images/deluxe_g.PNG" alt="" /></span>
+					<p>	</p>
+
+					<h4>Basic augmentation with diffaug</h4>
+
+					<span class="image aln-left"><img src="images/basic_diffaug_d.PNG" alt="" /></span>
+					<span class="image aln-right"><img src="images/basic_diffaug_g.PNG" alt="" /></span>
+					<p>	</p>
+
+					<h4>Deluxe augmentation with diffaug</h4>
+
+					<span class="image aln-left"><img src="images/deluxe_diffaug_d.PNG" alt="" /></span>
+					<span class="image aln-right"><img src="images/deluxe_diffaug_g.PNG" alt="" /></span>
+					<p>	</p>
+
+					<p>
+					Below is the sample of the training, left is output very early in the training, the right is the output after training
+					</p>
+
+					<span class="image aln-left"><img src="images/deluxe_diffaug_early.png" alt="" /></span>
+					<span class="image aln-right"><img src="images/deluxe_diffaug_late.png" alt="" /></span>
+
+					<p>
+					There is a stark improvement between the two images, the left image has a shadowy outline of the cat. But the images
+					are very uniform, details are missing, colors are wrong, and artifacts such as color lines exist. But the image on the right
+					looks very realistic, with minor artifacts such as the horizontal streaks where the generator struggles to create the whiskers.
+					</p>
+
+					<h4>Effect of Differential Augmentation</h4>
+
+					<p>
+					This is the result with deluxe augmentation. Left is output without diffaug, the right is the output with diffaug
+					</p>
+
+					<span class="image aln-left"><img src="images/deluxe_late.png" alt="" /></span>
+					<span class="image aln-right"><img src="images/deluxe_diffaug_late.png" alt="" /></span>
+					<p>	</p>
+
+					<p>
+					This is the result with basic augmentation. Left is output without diffaug, the right is the output with diffaug
+					</p>
+
+					<span class="image aln-left"><img src="images/basic_late.png" alt="" /></span>
+					<span class="image aln-right"><img src="images/basic_diffaug_late.png" alt="" /></span>
+					<p>	</p>
+
+					<p>
+					The differential augmentation is applied to both real and fake images at training time to reduce overfit. It includes augmentation in the color space
+					with changing brightness, saturation, and contrast. It also includes shifting the image with translation, and random cutouts. By preventing the 
+					discriminators from overfitting it is able to make the generators to create more general and realistic cat images as the discriminator cannot simply
+					memorize the training data. The result above for both the basic and deluxe augmentation shows that diffaug improves generator performance by creating
+					more varied cat images with less artifacts.
+					</p>
+
+					<p> </p>
+
+					<h2 id="CycleGAN">CycleGAN</h2>
+
+					<h3>Methodology</h3>
+
+					<h4>Discriminator</h4>
+					<p>
+					I used a patch discriminator for CycleGAN, i.e. instead of outputting 1x1 for the prediction of real/fake, it outputs 4x4 spatial output.
+					The same dircriminator from DCGAN can be employed, with a small change to the last layer. For conv5 I used K = 1, S = 1, and P = 0 to get the
+					output to be 4x4.
+					</p>
+
+					<h4>Generator</h4>
+					<p>
+					Cycle GAN generator consists of downsampling layers, residual block layers, upsampling layers, and unet style concatenation.
+					</p>
+					<span class="image fit"><img src="images/unet.png" alt="" /></span>
+					<p>	</p>
+
+					<h4>Training</h4>
+					<p>
+					Training is done with cycle GAN loss described below. To prevent overfit, the same data augmentation is used as DCGAN. A unique feature of
+					cycleGAN is the Cycle Consistency Loss, which is an L1 loss of an image being transformed to another domain and back. 
+					</p>
+					<span class="image fit"><img src="images/cyclegan_algo.png" alt="" /></span>
+					<p>	</p>
+
+					<h3>Results with Cat Dataset</h3>
+
+					<h4>Cyclegan with patch discriminator without cycle-consistency loss at early iterations</h4>
+
+					<span class="image align-left"><img src="images/cat-patch-sample-001000-X-Y.png" alt="" /></span>
+					<span class="image align-right"><img src="images/cat-patch-sample-001000-Y-X.png" alt="" /></span>
+					<p>	</p>
+
+					<h4>Cyclegan with patch discriminator with cycle-consistency loss at early iterations</h4>
+
+					<span class="image align-left"><img src="images/cat-patch-cycle-sample-001000-X-Y.png" alt="" /></span>
+					<span class="image align-right"><img src="images/cat-patch-cycle-sample-001000-Y-X.png" alt="" /></span>
+					<p>	</p>
+
+					<p>Generator output at early iterations look reasonable, so now we will try to train for longer</p>
+
+					<h4>Cyclegan with patch discriminator without cycle-consistency loss at late iterations</h4>
+
+					<span class="image align-left"><img src="images/cat-patch-sample-009000-X-Y.png" alt="" /></span>
+					<span class="image align-right"><img src="images/cat-patch-sample-009000-Y-X.png" alt="" /></span>
+					<p>	</p>
+
+					<h4>Cyclegan with patch discriminator with cycle-consistency loss at late iterations</h4>
+
+					<span class="image align-left"><img src="images/cat-patch-cycle-sample-009200-X-Y.png" alt="" /></span>
+					<span class="image align-right"><img src="images/cat-patch-cycle-sample-009200-Y-X.png" alt="" /></span>
+					<p>	</p>
+
+					<p>
+					The output without cycle-consistency loss produces more uniform images, this is most obvious with the right image.
+					The cat pose is similar regardless of the input. This is because the generator is only trained with GAN loss, and tries 
+					to fool the discriminator. So once the generator found an image that consistently fool the discriminator, it will stick to
+					that output. On the other hand, the output with cycle-consistency loss tries to preserve the input semantics and layout.
+					Therefore, the output of the cat pose mimic that of the input. This can be observed by looking at which direction is the input 
+					cat looking at, you will find similar direction in the generated cat.
+					</p>
+
+					<h4>Cyclegan with DC discriminator with cycle-consistency loss at late iterations</h4>
+
+					<span class="image align-left"><img src="images/cat-dc-cycle-sample-009200-X-Y.png" alt="" /></span>
+					<span class="image align-right"><img src="images/cat-dc-cycle-sample-009200-Y-X.png" alt="" /></span>
+					<p>	</p>
+
+					<p>
+					The DC discriminator seems to perform slightly worse than the patch discriminator. This is because the patch discriminator produces
+					a 4x4 output instead of 1x1. This helps to preserve local structures better. It considers patches of images instead of the entire image, forcing
+					all regions of the image to be locally 'real', eliminating some artifacts such as blurriness which can be ignored when considering the entire
+					image as a whole. This can be seen with the cat eyes and whiskers. The output with dc gan has 'laser' eyes and blurry whiskers.
+					</p>
+
+					<h3>Results with Apple Orange Dataset</h3>
+
+					<p>
+					In general, the model performs much worse in this dataset, this can be because of the high variety of image context.
+					The previous cat dataset has similar cat images with only slightly varying face poses. But the apple orange dataset has fruits in
+					different environment and scale. For example, close-up shots of fruits, a person holding fruits, multiple fruits in baskets, cut fruits, etc.
+					Hence the model struggles to understand what is an apple and an orange.
+					</p>
+
+					<h4>Cyclegan with patch discriminator without cycle-consistency loss at late iterations</h4>
+
+					<span class="image align-left"><img src="images/fruit-patch-sample-006000-X-Y.png" alt="" /></span>
+					<span class="image align-right"><img src="images/fruit-patch-sample-006000-Y-X.png" alt="" /></span>
+					<p>	</p>
+
+					<h4>Cyclegan with patch discriminator with cycle-consistency loss at late iterations</h4>
+
+					<span class="image align-left"><img src="images/fruit-patch-cycle-sample-009200-X-Y.png" alt="" /></span>
+					<span class="image align-right"><img src="images/fruit-patch-cycle-sample-009200-Y-X.png" alt="" /></span>
+					<p>	</p>
+
+					<p>
+					The output without cycle-consistency loss strangely still produces similar structures as the input. This can be because of the unet
+					architecture that concatenate the features of the input to the output. Regardless, the observation with the cat dataset still holds true.
+					The generator tries to generalize and crate less varying output. For example, it learns that oranges are yellow/orange in color, and paints
+					the output with a swath of that color. The output with cycle-consistency loss preserves the more of the structures, but it suffers in the 
+					translation part, most pronouce by the failure to transfer the colors.
+					</p>
+
+					<h4>Cyclegan with DC discriminator with cycle-consistency loss at late iterations</h4>
+
+					<span class="image align-left"><img src="images/fruit-dc-cycle-sample-009600-X-Y.png" alt="" /></span>
+					<span class="image align-right"><img src="images/fruit-dc-cycle-sample-009600-Y-X.png" alt="" /></span>
+					<p>	</p>
+
+					<p>
+					The DC discriminator seems to perform slightly better than the patch discriminator for this case, which contradicts the previous observation with
+					the cat dataset. This might be because the model is already strugglig to create a realistic output, so forcing it to have local realism hurts the performance
+					even more.
+					</p>
+
+				</div>
+			</section>
+		
+			<!-- <section class="wrapper style1 align-center">
+		
+				<div class="inner">
+					<h2 id="Bells & Whistles">Bells & Whistles</h2>
+
+					This section outlines the additional steps I took for extra credit.
+
+					<div class="index align-left">
+
+						<!-- Text -->
+						<!-- <section>
+							<header>
+								<h3>Mixed Gradients</h3>
+							</header>
+							<div class="content">
+
+								<p>
+								Instead of always transplanting the gradients from the source image, for each pixel, I transplant either the gradients from the source or
+								the brackground image based on the highest magnitude of gradients. This mixes the gradients of the source and background images.
+								</p>
+
+								<span class="image align-center"><img src="images/mixed2.jpg" alt="" /></span>
+
+								<p>
+								However, this produces a worse result in my opinion as it makes the source object slightly transparent and 'ghostly'
+								</p>
+
+							</div>
+						</section> -->
+
+					</div>
+				</div>
+			</section> -->
+
+			<!-- Footer -->
+			<footer class="wrapper style1 align-center">
+				<div class="inner">
+					<ul class="icons">
+						<li><a href="https://www.linkedin.com/in/kangkelvin/" class="icon brands style2 fa-linkedin-in"><span class="label">LinkedIn</span></a></li>
+						<li><a href="mailto:kelvin_kang@outlook.com" class="icon style2 fa-envelope"><span class="label">Email</span></a></li>
+					</ul>
+					<p>&copy; Kelvin Kang. Design: <a href="https://html5up.net">HTML5 UP</a>.</p>
+				</div>
+			</footer>
+
+		<!-- Scripts -->
+		<script src="assets/js/jquery.min.js"></script>
+		<script src="assets/js/jquery.scrollex.min.js"></script>
+		<script src="assets/js/jquery.scrolly.min.js"></script>
+		<script src="assets/js/browser.min.js"></script>
+		<script src="assets/js/breakpoints.min.js"></script>
+		<script src="assets/js/util.js"></script>
+		<script src="assets/js/main.js"></script>
+
+	</body>
+</html>
