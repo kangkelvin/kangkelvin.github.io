@@ -11,6 +11,8 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 		<link rel="stylesheet" href="assets/css/main.css" />
 		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+		<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+		<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 	</head>
 	<body class="is-preload">
 
@@ -64,12 +66,104 @@
 					<p>
 					Since we are performing this construction using only RGBD data, we first need to calculate the transformation matrix T of the camera
 					pose between consectutive frames. This is done using the point cloud data from the depth map that the RGBD sensor provides. ICP is a
-					common algorithm used to register two pointclouds, which involves  
+					common algorithm used to register two pointclouds. Below is animation that shows a sample of ICP running.
 					</p>
-					<span class="image align-center"><img src="images/3d-icp-1.JPG" alt="" /></span>
+					
+					<span class="image align-center"><img src="images/icp-viz.gif" alt="" /></span>
+					<p>
+					</p>
+
+					<p>
+					ICP involves finding the closest source point for each target point, which is an 
+					expensive operation. To speed up this process, Projective Closest Point is used. Each source point is projected to the image space, i.e.
+					the RGBD camera frame using projection operation, and finding the closest pixel point that it lands on in the image space. The corresponding
+					target point of that pixel is the reprojected back to the 3D space and its Eucledian distance is calculated to the source point. If the values
+					are larger than a certain threshold, the association is discarded, this prevents erroneous correspndonces since Projective Closest Point might
+					not provide the exact closest point. Therefore, the operation is done is O(n) time, instead of O(nlogn). This method only works because the pointclouds
+					data from RGBD is structured, i.e. each 3D point can be traced back to a 2D image pixel that it originates from.
+					</p>
+
+					<p>
+					</p>
+
+					<p>
+					Image below shows the before (left) and after (right) registration of two pointclouds from different frames. The right fused frame is able to register
+					the pointclouds with good overlap.
+					</p>
+
+					<span class="image fit"><img src="images/3d-icp-1.JPG" alt="" /></span>
 					<p>	</p>
 
-					
+					<p>
+					To stress-test the registration algorithm, two pointclouds from two different frames that are far apart is registered. As seen there are less overlap
+					and greater camera movement but the algorithm is still able to register the two clouds well.
+					</p>
+
+					<span class="image fit"><img src="images/3d-icp-2.JPG" alt="" /></span>
+
+					<h2>SLAM Factor Graph</h2>
+
+					<p>
+					To minimize the point-to-plane error between associated source and target points (\(p, q\)). The error function to minimize is:
+					</p>
+					<p>
+					\[ \sum_{i\in\Omega} \| n^T_{q_i}(Rp_i+t-q_i) \|^2\]
+					</p>
+					<p>
+					Where (\(p_i, q_i\)) is the \(i\)-th associated point pair in the association set \Omega and \(n_{q_i}\) is the estimated normal at \(q_i\).
+					A small angle assumption between two consecutive frames is made, hence the rotation matrix \(R\) is parameterized as:
+					</p>
+					<p>
+					\(\delta R = 
+					\begin{bmatrix}
+					1 & -\gamma & \beta\\
+					\gamma & 1 & -\alpha\\
+					-\beta & \alpha & 1
+					\end{bmatrix}\)
+					</p>
+					<p>
+					For the translation component, we define \(\delta t = 
+					\begin{bmatrix}
+					t_x & t_y & t_z
+					\end{bmatrix}\)
+					</p>
+					<p>
+					Therefore, the error function can be redefined with \(p^\prime_i = Rp_i + t\)
+					</p>
+					<p>
+					\[ \sum_{i\in\Omega}r^2_i = \| n^T_{q_i}((\delta R)p^\prime_i+\delta t-q_i) \|^2\]
+					</p>
+					<p>
+					To solve this SLAM we first create a linear system of equation to solve it with least squares in the form of \(Ax=b\)
+					</p>
+					<p>
+					\(r_i(\alpha,\beta,\gamma,t_x,t_y,t_z) = A_i\begin{bmatrix}\alpha \\ \beta \\ \gamma \\ t_x \\ t_y \\ t_z\end{bmatrix} + b_i\)
+					</p>
+					<p>
+					\(A_i = \begin{bmatrix}p^\prime_i \times n_{q_i} & n^T_{q_i} \end{bmatrix}\)
+					<br>\(b_i = \begin{bmatrix}n^T_{q_i}(p^\prime_i - q_i) \end{bmatrix}\)
+					</p>
+					<p>
+					The linear system of equations is sparse, which can be exploited to speed up computation using QR factorization
+					</p>					
+			</section>
+
+			<section class="wrapper style1 align-center">
+				
+				<div class="inner">
+					<h1>Results</h1>
+					<p>
+					</p>
+
+					<p>
+					Below are the final reconstructed result combining ICP and SLAM, the black arrows are the normal of each point.
+					</p>
+
+					<span class="image fit"><img src="images/3d-1.png" alt="" /></span>
+					<span class="image fit"><img src="images/3d-1-norm.png" alt="" /></span>
+					<span class="image fit"><img src="images/3d-2.png" alt="" /></span>
+					<span class="image fit"><img src="images/3d-2-norm.png" alt="" /></span>
+									
 			</section>
 
 
