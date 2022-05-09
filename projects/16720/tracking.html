@@ -1,0 +1,194 @@
+<!DOCTYPE HTML>
+<!--
+	Story by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Tracking</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+		<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+		<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+	</head>
+	<body class="is-preload">
+
+		<!-- Wrapper -->
+		<div id="wrapper" class="divided">
+
+			<!-- Landing Page -->
+			<section class="banner style1 orient-left content-align-left image-position-center fullscreen onload-image-fade-in onload-content-fade-right">
+				<div class="content">
+					<h1>Lukas-Kanade & Matthew-Baker Tracker</h1>
+					<h3>Author: Kelvin Kang</h3>
+					<p class="major">
+					This project aims to track a bounding box around an object in an image along multiple frames using classical CV techniques
+					</p>
+					<!-- <ul class="actions stacked">
+						<li><a href="#first" class="button big wide smooth-scroll-middle">Get Started</a></li>
+					</ul> -->
+				</div>
+				<div class="image fit">
+					<img src="images/ic_tracker_car2.gif" alt="" class="center"/>
+				</div>
+			</section>
+
+			<!-- Highlight 1 -->
+			<section class="spotlight style1 orient-right content-align-left image-position-center onscroll-image-fade-in" id="first">
+				<div class="content">
+					<h2>Approach</h2>
+					<p>
+					To track a template between consecutive frames, The classical Lukas-Kanade and Matthew-Baker (Inverse Compositional) algorithms are used.
+					In essence, these algorithms find the Jacobian of the error between the frames and calculate the required transformation matrix to reduce the error.
+					</p>
+					<!-- <ul class="actions stacked">
+						<li><a href="#" class="button">Learn More</a></li>
+					</ul> -->
+				</div>
+				<div class="image">
+					<img src="images/ic_tracker_landing.gif" alt="" />
+				</div>
+			</section>
+
+			<!-- Additional Elements -->
+			<section class="wrapper style1 align-center">
+				
+				<div class="inner">
+					<h1>Methodology</h1>
+					<p>
+					</p>
+
+
+					<h2>Some Terminology</h2>
+					<p>
+					\(x\) is pixel coordinate. \(I(x)\) is the image intensity at \(x\). \(W(x;p)\) is a warp operation being applied on \(x\) based on parameter
+					\(p\). \(T\) is a set of coordinate points that denote the template that we want to track, i.e. a crop of the image of the object we are tracking.
+					\(\nabla I\) is the image gradient. \(J\) is Jacobian matrix, \(H\) is Hessian matrix 
+					</p>
+
+					<h2>Lukas-Kanade Tracker</h2>
+					<p>
+					The goal of the tracking can be summarized with the following objective function
+					</p>
+					<p>
+					\(p^\ast = \underset{p}{\mathrm{argmin}} \sum_{x} \| T(x) - I(W(x;p)) \|^2\)
+					</p>
+					<p>
+					Hence we are trying to find a warping parameter \(p\) that minimizes the L2 pixel difference between the 2nd frame and the warped 1st frame, i.e.
+					what transformation will align the two images together well. To simplify this problem, we will breakdown \(p\) so that we only need to find the 
+					deltas for its forward-additive alignment.
+					</p>
+					<p>
+					\(p^\ast = p_0 + \delta p\)
+					</p>
+					<p>
+					The loss function is now therefore
+					</p>
+					<p>
+					\(p^\ast = \underset{p}{\mathrm{argmin}} \sum_{x} \| T(x) - I(W(x;p_0 + \delta p)) \|^2\)
+					</p>
+					<p>
+					Which can be approximated with Taylor first order series to:
+					</p>
+					<p>
+					\(p^\ast = \underset{\delta p}{\mathrm{argmin}} \sum_{x} \| T(x) - I(W(x;p_0) - \nabla I(x)\frac{\partial W}{\partial p_0}\delta p) \|^2\)
+					</p>
+					<p>
+					We then rearrange the equation to be written as a least squares formulation of \(Ax-b\)
+					</p>
+					<p>
+					\(p^\ast = \underset{\delta p}{\mathrm{argmin}} \sum_{x} \| \nabla I(x)\frac{\partial W}{\partial p_0}\delta p - (T(x) - I(W(x;p_0)) \|^2\)
+					</p>
+					<p>
+					However, we can't directly solve this with your favourite least squares solver as our initial estimate of \(p_0\) might be quite off so we will
+					break the Taylor Series approximation. Instead, we will iterative solve this by computing the Jacobian \(J\), then the Hessian \(H = J^T J\) 
+					and computing \(\delta p\) with the following equation
+					</p>
+					<p>
+					\(\delta p = H^{-1}{\sum_{x} [\nabla I(x)\frac{\partial W}{\partial p_0}]^T{T(x) - I(W(x;p_0))}}\)
+					</p>
+					<p>
+					And iteratively compute \(p \leftarrow p + \delta p\) until \(\| \delta p\| < \epsilon \)
+					</p>
+
+					<h2>Matthew-Baker Tracker</h2>
+
+					<p>
+					Key advantage of the Matthew-Baker algorithm compared to Lukas-Kanade is in its efficiency, this is because of instead of warping a new image \(I\)
+					to the template \(T\), Matthew-Baker warps the template \(T\) to image \(I\). This is useful because the template does not change from frame-to-frame.
+					Hence, we can pre-compute the Jacobian and Hessian matrix, and re-use it throughout the tracking. The loss function is now:
+					</p>
+
+					<p>
+					\(p^\ast = \underset{\delta p}{\mathrm{argmin}} \sum_{x} \| \nabla T(x)\frac{\partial W}{\partial p_0}\delta p - (I(W(x;p_0) - T(x)) \|^2\)
+					</p>
+					<P>
+					And the closed-form solution to the \(\delta p\) is
+					</P>
+					<p>
+					\(\delta p = H^{-1}{\sum_{x} [\nabla T(x)\frac{\partial W}{\partial p_0}]^T{I(W(x;p_0)) - T(x)}}\)
+					</p>
+
+					<p>
+					Another trick used by Matthew-Baker algoritm is in the warp parameter update. Instead of doing \(p^\ast = p_0 + \delta p\), Matthew-Baker uses
+					</p>
+
+					<p>
+					\(W(x;p^\ast) = W(W(x;\delta p);p_0\)
+					<br>
+					\(W(x;p^\ast) = W(p_0)W(\delta p)^{-1}x\)
+					</p>
+
+					<p>
+					We can now mimic the Lukas-Kanade algorithm that solves for \(p^\ast\) iteratively, but now we precompute the Jacobian and Hessian. And updates the
+					warp with an inverse composition.
+					</p>
+			</section>
+
+			<section class="wrapper style1 align-center">
+				
+				<div class="inner">
+					<h1>Results</h1>
+					<p>
+					</p>
+
+					<p>
+					Below are the final result of Matthew-Baker algorithm tracking some objects. algorithm performs pretty well when object does not move rapidly between
+					frames, but it fails when there are rapid movement (ballet and horse), or when there is a dramatic change in pixel intensity values, such as when the
+					car goes under the bridge.
+					</p>
+
+					<span class="image align-left"><img src="images/ic_tracker_car2.gif" alt="" /></span>
+					<span class="image align-right"><img src="images/ic_tracker_landing.gif" alt="" /></span>
+					<span class="image align-left"><img src="images/ic_tracker_car1.gif" alt="" /></span>
+					<span class="image align-right"><img src="images/ic_tracker_ballet.gif" alt="" /></span>
+					<span class="image align-center"><img src="images/ic_tracker_race.gif" alt="" /></span>
+									
+			</section>
+
+
+			<!-- Footer -->
+			<footer class="wrapper style1 align-center">
+				<div class="inner">
+					<ul class="icons">
+						<li><a href="https://www.linkedin.com/in/kangkelvin/" class="icon brands style2 fa-linkedin-in"><span class="label">LinkedIn</span></a></li>
+						<li><a href="mailto:kelvin_kang@outlook.com" class="icon style2 fa-envelope"><span class="label">Email</span></a></li>
+					</ul>
+					<p>&copy; Kelvin Kang. Design: <a href="https://html5up.net">HTML5 UP</a>.</p>
+				</div>
+			</footer>
+
+		<!-- Scripts -->
+		<script src="assets/js/jquery.min.js"></script>
+		<script src="assets/js/jquery.scrollex.min.js"></script>
+		<script src="assets/js/jquery.scrolly.min.js"></script>
+		<script src="assets/js/browser.min.js"></script>
+		<script src="assets/js/breakpoints.min.js"></script>
+		<script src="assets/js/util.js"></script>
+		<script src="assets/js/main.js"></script>
+
+	</body>
+</html>
