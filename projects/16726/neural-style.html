@@ -23,7 +23,7 @@
 					<h1>Neural Style Transfer</h1>
 					<h3>Author: Kelvin Kang</h3>
 					<p class="major">
-						Neural Style Transer model takes in a content image, e.g. a real photo of a building, and a style image, e.g. a famous painting, and transfer
+						Neural Style Transfer model takes in a content image, e.g. a real photo of a building, and a style image, e.g. a famous painting, and transfer
 						the style from the painting to the content image.
 					</p>
 					<!-- <ul class="actions stacked">
@@ -105,9 +105,9 @@
 					<h1>Style Transfer</h1>
 
 					<p>
-					The style transfer pipelines starts with a pre-trained VGG19 net. I chopped off the layers after 'conv_5' as they are unnecesary for this task.
+					The style transfer pipeline starts with a pre-trained VGG19 net. I chopped off the layers after 'conv_5' as they are unnecessary for this task.
 					Then I insert PyTorch modules for the Content and Style loss. The initial, content, and style images are then passed to the network to extract their features and gram matrix 
-					for loss calcuation. LBFGS optimizer is used to iteratively optimize the initial image. I did not use a for loop to set the number of iterations, I instead change the
+					for loss calculation. LBFGS optimizer is used to iteratively optimize the initial image. I did not use a for loop to set the number of iterations, I instead change the
 					max_iter of the LBFGS and lowering its convergence threshold to force it to keep iterating until max_iter is reached.
 					</p>
 					<p>	</p>

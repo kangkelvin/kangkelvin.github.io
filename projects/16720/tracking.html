@@ -103,8 +103,8 @@
 					\(p^\ast = \underset{\delta p}{\mathrm{argmin}} \sum_{x} \| \nabla I(x)\frac{\partial W}{\partial p_0}\delta p - (T(x) - I(W(x;p_0)) \|^2\)
 					</p>
 					<p>
-					However, we can't directly solve this with your favourite least squares solver as our initial estimate of \(p_0\) might be quite off so we will
-					break the Taylor Series approximation. Instead, we will iterative solve this by computing the Jacobian \(J\), then the Hessian \(H = J^T J\) 
+					However, we can't directly solve this with your favourite least squares solver as our initial estimate of \(p_0\) might be quite off, so we will
+					break the Taylor Series approximation. Instead, we will iteratively solve this by computing the Jacobian \(J\), then the Hessian \(H = J^T J\) 
 					and computing \(\delta p\) with the following equation
 					</p>
 					<p>
@@ -133,7 +133,7 @@
 					</p>
 
 					<p>
-					Another trick used by Matthew-Baker algoritm is in the warp parameter update. Instead of doing \(p^\ast = p_0 + \delta p\), Matthew-Baker uses
+					Another trick used by Matthew-Baker algorithm is in the warp parameter update. Instead of doing \(p^\ast = p_0 + \delta p\), Matthew-Baker uses
 					</p>
 
 					<p>
@@ -143,7 +143,7 @@
 					</p>
 
 					<p>
-					We can now mimic the Lukas-Kanade algorithm that solves for \(p^\ast\) iteratively, but now we precompute the Jacobian and Hessian. And updates the
+					We can now mimic the Lukas-Kanade algorithm that solves for \(p^\ast\) iteratively, but now we pre-compute the Jacobian and Hessian. And updates the
 					warp with an inverse composition.
 					</p>
 			</section>
@@ -156,7 +156,7 @@
 					</p>
 
 					<p>
-					Below are the final result of Matthew-Baker algorithm tracking some objects. algorithm performs pretty well when object does not move rapidly between
+					Below are the final result of Matthew-Baker algorithm tracking some objects. Algorithm performs pretty well when object does not move rapidly between
 					frames, but it fails when there are rapid movement (ballet and horse), or when there is a dramatic change in pixel intensity values, such as when the
 					car goes under the bridge.
 					</p>

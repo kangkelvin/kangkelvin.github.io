@@ -65,7 +65,7 @@
 					<h2>Iterative Closest Point (ICP)</h2>
 					<p>
 					Since we are performing this construction using only RGBD data, we first need to calculate the transformation matrix T of the camera
-					pose between consectutive frames. This is done using the point cloud data from the depth map that the RGBD sensor provides. ICP is a
+					pose between consecutive frames. This is done using the point cloud data from the depth map that the RGBD sensor provides. ICP is a
 					common algorithm used to register two pointclouds. Below is animation that shows a sample of ICP running.
 					</p>
 					
@@ -77,8 +77,8 @@
 					ICP involves finding the closest source point for each target point, which is an 
 					expensive operation. To speed up this process, Projective Closest Point is used. Each source point is projected to the image space, i.e.
 					the RGBD camera frame using projection operation, and finding the closest pixel point that it lands on in the image space. The corresponding
-					target point of that pixel is the reprojected back to the 3D space and its Eucledian distance is calculated to the source point. If the values
-					are larger than a certain threshold, the association is discarded, this prevents erroneous correspndonces since Projective Closest Point might
+					target point of that pixel is the re-projected back to the 3D space and its Euclidean distance is calculated to the source point. If the values
+					are larger than a certain threshold, the association is discarded, this prevents erroneous correspondences since Projective Closest Point might
 					not provide the exact closest point. Therefore, the operation is done is O(n) time, instead of O(nlogn). This method only works because the pointclouds
 					data from RGBD is structured, i.e. each 3D point can be traced back to a 2D image pixel that it originates from.
 					</p>

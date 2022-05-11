@@ -64,7 +64,7 @@
 
 					<h4>Discriminator</h4>
 					<p>
-					GAN consist of a discriminator and a generator. The discriminator used is a few layes of CNN network that outputs a single number that predicts
+					GAN consist of a discriminator and a generator. The discriminator used is a few layers of CNN network that outputs a single number that predicts
 					if an image is real or fake. The architecture of the discriminator is shown below. I used a kernel size K = 4 and stride S = 2. Since I want
 					to half the image size at every layer for conv1 to conv4, I can use the equation input_size = (output_size - K + 2P) / S + 1, 
 					to calculate that P = 1 for this case. For the conv5, using the same equation I can calculate that P = 0.
@@ -75,7 +75,7 @@
 					<h4>Generator</h4>
 					<p>
 					For the generator, we used upsampling and convolutional layer to generate an image from a vector of random noise. The architecture of the generator
-					is shown below. up_conv2 to up_conv5 uses a 2x upsampling then followed by convolutional with K = 5, S = 1, and P = 2. Hence the input to the layer
+					is shown below. up_conv2 to up_conv5 uses a 2x upsampling then followed by convolutional with K = 5, S = 1, and P = 2. Hence, the input to the layer
 					is doubled in size and the convolutions do not change the sizes. up_conv1 is implemented with only a convolutional layer with K = 4, S = 1, and P = 3.
 					This will change the input 1x1 into output 4x4.
 					</p>
@@ -84,7 +84,7 @@
 
 					<h4>Training</h4>
 					<p>
-					Training is done with a simple GAN loss described below. To prevent overfit, the data augmentation is used. I used random crop, color jitter, 
+					Training is done with a simple GAN loss described below. To prevent over-fit, the data augmentation is used. I used random crop, color jitter, 
 					random horizontal flip and differential augmentation.
 					</p>
 					<span class="image fit"><img src="images/gan_algo.png" alt="" /></span>
@@ -148,9 +148,9 @@
 					<p>	</p>
 
 					<p>
-					The differential augmentation is applied to both real and fake images at training time to reduce overfit. It includes augmentation in the color space
+					The differential augmentation is applied to both real and fake images at training time to reduce over-fit. It includes augmentation in the color space
 					with changing brightness, saturation, and contrast. It also includes shifting the image with translation, and random cutouts. By preventing the 
-					discriminators from overfitting it is able to make the generators to create more general and realistic cat images as the discriminator cannot simply
+					discriminators from over-fitting it is able to make the generators to create more general and realistic cat images as the discriminator cannot simply
 					memorize the training data. The result above for both the basic and deluxe augmentation shows that diffaug improves generator performance by creating
 					more varied cat images with less artifacts.
 					</p>
@@ -164,7 +164,7 @@
 					<h4>Discriminator</h4>
 					<p>
 					I used a patch discriminator for CycleGAN, i.e. instead of outputting 1x1 for the prediction of real/fake, it outputs 4x4 spatial output.
-					The same dircriminator from DCGAN can be employed, with a small change to the last layer. For conv5 I used K = 1, S = 1, and P = 0 to get the
+					The same discriminator from DCGAN can be employed, with a small change to the last layer. For conv5 I used K = 1, S = 1, and P = 0 to get the
 					output to be 4x4.
 					</p>
 
@@ -230,7 +230,7 @@
 					The DC discriminator seems to perform slightly worse than the patch discriminator. This is because the patch discriminator produces
 					a 4x4 output instead of 1x1. This helps to preserve local structures better. It considers patches of images instead of the entire image, forcing
 					all regions of the image to be locally 'real', eliminating some artifacts such as blurriness which can be ignored when considering the entire
-					image as a whole. This can be seen with the cat eyes and whiskers. The output with dc gan has 'laser' eyes and blurry whiskers.
+					image as a whole. This can be seen with the cat eyes and whiskers. The output with DCGAN has 'laser' eyes and blurry whiskers.
 					</p>
 
 					<h3>Results with Apple Orange Dataset</h3>
@@ -255,11 +255,11 @@
 					<p>	</p>
 
 					<p>
-					The output without cycle-consistency loss strangely still produces similar structures as the input. This can be because of the unet
+					The output without cycle-consistency loss strangely still produces similar structures as the input. This can be because of the U-Net
 					architecture that concatenate the features of the input to the output. Regardless, the observation with the cat dataset still holds true.
 					The generator tries to generalize and crate less varying output. For example, it learns that oranges are yellow/orange in color, and paints
 					the output with a swath of that color. The output with cycle-consistency loss preserves the more of the structures, but it suffers in the 
-					translation part, most pronouce by the failure to transfer the colors.
+					translation part, most pronounce by the failure to transfer the colors.
 					</p>
 
 					<h4>Cyclegan with DC discriminator with cycle-consistency loss at late iterations</h4>
@@ -270,7 +270,7 @@
 
 					<p>
 					The DC discriminator seems to perform slightly better than the patch discriminator for this case, which contradicts the previous observation with
-					the cat dataset. This might be because the model is already strugglig to create a realistic output, so forcing it to have local realism hurts the performance
+					the cat dataset. This might be because the model is already struggling to create a realistic output, so forcing it to have local realism hurts the performance
 					even more.
 					</p>
 
